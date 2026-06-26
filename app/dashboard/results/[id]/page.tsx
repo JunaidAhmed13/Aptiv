@@ -10,7 +10,6 @@ import { normalizeScore, isQualified } from "@/lib/score";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ResultsTable } from "@/components/results/results-table";
-import { LiveExamplePanel } from "@/components/results/live-example-panel";
 
 export default function ResultsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -61,7 +60,7 @@ export default function ResultsPage({ params }: { params: Promise<{ id: string }
   ).length;
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto max-w-5xl">
       <Link
         href="/dashboard"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -93,19 +92,9 @@ export default function ResultsPage({ params }: { params: Promise<{ id: string }
         </div>
       </Card>
 
-      {/* Ranked list on the left, sample-output showcase on the right. */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]">
-        <div className="min-w-0">
-          <ResultsTable candidates={candidates} />
-        </div>
-        <aside className="hidden lg:block">
-          <div className="sticky top-6">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              What Aptiv returns
-            </h2>
-            <LiveExamplePanel />
-          </div>
-        </aside>
+      {/* Ranked candidate list */}
+      <div className="mt-6">
+        <ResultsTable candidates={candidates} />
       </div>
     </div>
   );
