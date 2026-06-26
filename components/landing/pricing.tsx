@@ -133,7 +133,7 @@ export function Pricing() {
                 <div className="mt-7">
                   {t.action === "contact" ? (
                     <a href={contactMailto(t.name)} className="block">
-                      <Button className="w-full" variant={t.featured ? "primary" : "outline"}>
+                      <Button className="w-full" variant={t.featured || t.name === "Scale" ? "primary" : "outline"}>
                         {t.cta}
                       </Button>
                     </a>
