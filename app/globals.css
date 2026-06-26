@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Semantic color tokens (RGB triplets for Tailwind <alpha-value> support).
+       Palette is restricted to purple + white + near-black ink. */
+    --background: 250 250 252;        /* near-white, faint cool tint */
+    --foreground: 17 15 28;           /* near-black ink */
+    --surface: 255 255 255;           /* cards */
+    --surface-muted: 245 245 250;     /* subtle panels */
+    --border: 230 230 240;
+    --muted: 242 241 248;
+    --muted-foreground: 98 96 116;
+    --primary: 99 102 241;            /* indigo-500 */
+    --primary-foreground: 255 255 255;
+    --accent: 139 92 246;             /* violet-500 */
+    --accent-foreground: 255 255 255;
+    --success: 16 162 110;
+    --warning: 202 138 4;
+    --danger: 220 38 38;
+  }
+
+  .dark {
+    /* Dark mode is strictly dark/neutral: NO color accents in text, icons, or
+       gradients. The only place a violet tint survives is the solid primary
+       CTA fill, via --cta below (kept so the primary action stands out). */
+    --background: 13 13 16;           /* near-black, neutral */
+    --foreground: 237 237 242;        /* off-white ink */
+    --surface: 22 22 27;
+    --surface-muted: 28 28 34;
+    --border: 44 44 52;
+    --muted: 32 32 38;
+    --muted-foreground: 161 161 170;
+    /* primary/accent are neutralized so every text-primary / text-accent /
+       coral-* usage renders as light-neutral, not violet. */
+    --primary: 226 226 232;
+    --primary-foreground: 22 22 27;
+    --accent: 200 200 208;
+    --accent-foreground: 22 22 27;
+    --success: 110 200 160;          /* desaturated, still readable */
+    --warning: 214 196 140;
+    --danger: 236 150 150;
+    /* Muted violet kept ONLY for the solid CTA button fill in dark mode. */
+    --cta: 124 110 224;
+    --cta-foreground: 255 255 255;
+  }
+
+  :root {
+    /* In light mode the CTA simply follows the brand primary. */
+    --cta: var(--primary);
+    --cta-foreground: var(--primary-foreground);
+  }
+
+  * {
+    border-color: rgb(var(--border));
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    font-feature-settings: "cv11", "ss01";
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Respect reduced-motion globally */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Tabular figures for data columns / scores */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Brand text gradient — violet -> indigo */
+  .text-brand-gradient {
+    background-image: linear-gradient(110deg, #a78bfa 0%, #8b5cf6 38%, #6366f1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Dark mode: brand gradient becomes a neutral light-ink gradient (no color). */
+  .dark .text-brand-gradient {
+    background-image: linear-gradient(110deg, #f4f4f7 0%, #d6d6de 55%, #a1a1aa 100%);
+  }
+
+  /* Pill badge used for feature callouts */
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-surface/70 px-3.5 py-1.5 text-sm font-medium text-muted-foreground backdrop-blur;
+  }
+
+  /* Glassy card surface — theme-aware via tokens */
+  .glass {
+    @apply border border-border/60 bg-surface/70 backdrop-blur-xl;
+  }
+
+  /* Skeleton shimmer block */
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-muted;
+  }
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.65),
+      transparent
+    );
+  }
+}
+
+@layer utilities {
+  /* Static purple field — reduced-motion / no-WebGL fallback for the liquid blob. */
+  .liquid-fallback {
+    background:
+      radial-gradient(40rem 34rem at 18% 12%, rgba(124, 58, 237, 0.20), transparent 60%),
+      radial-gradient(36rem 36rem at 82% 18%, rgba(99, 102, 241, 0.18), transparent 60%),
+      radial-gradient(34rem 30rem at 50% 90%, rgba(167, 139, 250, 0.16), transparent 62%);
+  }
+  .dark .liquid-fallback {
+    background:
+      radial-gradient(40rem 34rem at 18% 12%, rgba(139, 92, 246, 0.30), transparent 60%),
+      radial-gradient(36rem 36rem at 82% 18%, rgba(99, 102, 241, 0.26), transparent 62%),
+      radial-gradient(34rem 30rem at 50% 90%, rgba(124, 58, 237, 0.24), transparent 62%);
+  }
+
+  /* Dark-mode neutralizer for the few literal indigo/violet utility classes
+     scattered through out-of-scope components. Keeps dark mode strictly
+     neutral without rewriting every file. Solid CTA fills use --cta instead
+     and are intentionally excluded. */
+  .dark .text-indigo-600,
+  .dark .text-indigo-500,
+  .dark .text-violet-600,
+  .dark .text-violet-500 {
+    color: rgb(var(--foreground) / 0.85) !important;
+  }
+  .dark .hover\:text-indigo-600:hover {
+    color: rgb(var(--foreground)) !important;
+  }
+  /* Decorative solid violet/indigo gradient chips & avatars -> neutral surface */
+  .dark .bg-gradient-to-br.from-indigo-500.to-violet-600,
+  .dark .bg-gradient-to-r.from-indigo-500.to-violet-500 {
+    background-image: none !important;
+    background-color: rgb(var(--muted)) !important;
+    color: rgb(var(--foreground)) !important;
+  }
+
+  /* Subtle dotted grid texture — adapts to theme via foreground token */
+  .grid-dots {
+    background-image: radial-gradient(rgb(var(--foreground) / 0.05) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
