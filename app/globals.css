@@ -70,6 +70,13 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
+  /* Even line lengths on headings (h1 skipped: its rotating-line sizer trick
+     depends on stable single-phrase wrapping). */
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
   /* Respect reduced-motion globally */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -85,6 +92,31 @@
   /* Tabular figures for data columns / scores */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Brand-tinted text selection (neutral in dark mode). */
+  ::selection {
+    background: rgb(var(--accent) / 0.22);
+  }
+  .dark ::selection {
+    background: rgb(var(--foreground) / 0.18);
+  }
+
+  /* Quiet scrollbar (WebKit); Firefox picks up scrollbar-color. */
+  html {
+    scrollbar-color: rgb(var(--border)) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--border));
+    border-radius: 8px;
+    border: 3px solid rgb(var(--background));
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 
@@ -175,5 +207,52 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Film-grain overlay so large gradients read as textured, not plasticky.
+     Apply only to pointer-events-none decorative layers. */
+  .noise {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+
+  /* Underline that grows from the left on hover; used for quiet text links. */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* Top hairline that fades in from the edges; frames "app window" panels. */
+  .edge-hairline {
+    position: relative;
+  }
+  .edge-hairline::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--accent) / 0.45) 30%,
+      rgb(var(--primary) / 0.45) 70%,
+      transparent
+    );
+    pointer-events: none;
+  }
+  .dark .edge-hairline::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--foreground) / 0.22) 50%,
+      transparent
+    );
   }
 }

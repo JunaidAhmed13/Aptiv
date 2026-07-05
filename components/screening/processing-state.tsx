@@ -43,17 +43,17 @@ export function ProcessingState({ cvCount }: { cvCount: number }) {
     <div className="mx-auto max-w-lg text-center">
       <div className="relative mx-auto h-24 w-24">
         <motion.div
-          className="absolute inset-0 rounded-full bg-gradient-to-br from-coral-400 to-indigo-500 opacity-20 blur-xl"
+          className="absolute inset-0 rounded-full bg-primary opacity-20 blur-xl"
           animate={{ scale: [1, 1.15, 1] }}
           transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-500 border-r-coral-500"
+          className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary border-r-accent"
           animate={{ rotate: 360 }}
           transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
         />
         <div className="absolute inset-0 grid place-items-center">
-          <Sparkles className="h-8 w-8 text-indigo-600" />
+          <Sparkles className="h-8 w-8 text-primary" />
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export function ProcessingState({ cvCount }: { cvCount: number }) {
         {cvCount > 0 ? (
           <>
             Analyzing candidate ~{estCandidate} of {cvCount}. This can take up to a
-            couple of minutes for large batches — you can keep this tab open.
+            couple of minutes for large batches. You can keep this tab open.
           </>
         ) : (
           "Working through your batch…"
@@ -80,7 +80,7 @@ export function ProcessingState({ cvCount }: { cvCount: number }) {
               key={stage.label}
               className={`flex items-center gap-3 rounded-2xl border px-4 py-3 transition-colors ${
                 active
-                  ? "border-indigo-200 bg-indigo-50"
+                  ? "border-primary/25 bg-primary/10"
                   : done
                     ? "border-success/20 bg-success/5"
                     : "border-border bg-surface-muted"
@@ -89,7 +89,7 @@ export function ProcessingState({ cvCount }: { cvCount: number }) {
               <span
                 className={`grid h-9 w-9 place-items-center rounded-xl ${
                   active
-                    ? "bg-indigo-500 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : done
                       ? "bg-success/15 text-success"
                       : "bg-muted text-muted-foreground"
@@ -106,7 +106,7 @@ export function ProcessingState({ cvCount }: { cvCount: number }) {
               </span>
               {active && (
                 <motion.span
-                  className="ml-auto h-2 w-2 rounded-full bg-indigo-500"
+                  className="ml-auto h-2 w-2 rounded-full bg-primary"
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 1.2, repeat: Infinity }}
                 />

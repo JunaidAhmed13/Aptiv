@@ -30,3 +30,7 @@ yarn-error.log*
 # editor
 .vscode/
 .idea/
+
+# internal working docs (design/agent context, not product code)
+PRODUCT.md
+frontend-polish.md

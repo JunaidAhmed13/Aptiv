@@ -61,11 +61,10 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         display: ["var(--font-geist)", "var(--font-inter)", "sans-serif"],
-        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
       fontSize: {
         // Editorial display scale
-        "display-xl": ["clamp(3rem, 6vw, 5.5rem)", { lineHeight: "1.02", letterSpacing: "-0.03em" }],
+        "display-xl": ["clamp(3.25rem, 6.5vw, 6rem)", { lineHeight: "1.02", letterSpacing: "-0.035em" }],
         "display-lg": ["clamp(2.5rem, 5vw, 4rem)", { lineHeight: "1.05", letterSpacing: "-0.025em" }],
         "display-md": ["clamp(2rem, 3.5vw, 3rem)", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
       },
@@ -76,7 +75,7 @@ const config: Config = {
       boxShadow: {
         soft: "0 1px 2px rgba(16,24,40,0.04), 0 4px 16px rgba(16,24,40,0.06)",
         card: "0 2px 8px rgba(16,24,40,0.06), 0 12px 32px rgba(16,24,40,0.08)",
-        lift: "0 12px 40px rgba(99,102,241,0.18), 0 4px 12px rgba(255,107,74,0.12)",
+        lift: "0 12px 40px rgba(124,58,237,0.22), 0 4px 12px rgba(99,102,241,0.14)",
         glow: "0 0 0 1px rgba(255,255,255,0.6) inset, 0 8px 30px rgba(99,102,241,0.25)",
       },
       keyframes: {

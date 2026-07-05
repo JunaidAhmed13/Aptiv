@@ -3,17 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Sparkles, FileCheck2, Gauge, Users, Layers } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { LiquidBlobBackground } from "@/components/liquid-blob";
-
-const PILLS = [
-  { icon: Gauge, label: "Fit scored 0 to 10" },
-  { icon: Users, label: "Strengths and gaps, spelled out" },
-  { icon: FileCheck2, label: "Works with any job description" },
-  { icon: Layers, label: "Screens the whole batch at once" },
-];
+import { CursorGlow } from "@/components/effects/cursor-glow";
 
 // Fixed first line, then a rotating value line. No buzzwords, no em dashes.
 const ROTATING = [
@@ -23,11 +17,11 @@ const ROTATING = [
 ];
 
 const fade = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 18 },
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: 0.1 + i * 0.08, duration: 0.5, ease: "easeOut" },
+    transition: { delay: 0.12 + i * 0.1, duration: 0.55, ease: [0.16, 1, 0.3, 1] },
   }),
 };
 
@@ -37,7 +31,7 @@ function RotatingLine() {
 
   useEffect(() => {
     if (reduce) return;
-    const id = setInterval(() => setI((v) => (v + 1) % ROTATING.length), 2200);
+    const id = setInterval(() => setI((v) => (v + 1) % ROTATING.length), 2600);
     return () => clearInterval(id);
   }, [reduce]);
 
@@ -69,13 +63,19 @@ function RotatingLine() {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-36 pb-24 sm:pt-44 sm:pb-28">
+    <section className="relative overflow-hidden pt-32 pb-24 sm:pt-40 sm:pb-32">
+      {/* Layered background: fluid sim (base) + spring cursor glow + grain. */}
       <LiquidBlobBackground />
+      <CursorGlow />
+      <div
+        aria-hidden
+        className="noise pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.05]"
+      />
 
       <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
         <motion.div custom={0} variants={fade} initial="hidden" animate="show">
           <span className="pill">
-            <Sparkles className="h-4 w-4 text-primary" />
+            <Sparkles className="h-4 w-4 text-primary" aria-hidden />
             Built for high-volume recruiting
           </span>
         </motion.div>
@@ -85,7 +85,7 @@ export function Hero() {
           variants={fade}
           initial="hidden"
           animate="show"
-          className="mx-auto mt-7 max-w-4xl font-display text-display-xl font-bold text-foreground"
+          className="mx-auto mt-8 max-w-4xl font-display text-display-xl font-bold text-foreground"
         >
           Every résumé read.
           <RotatingLine />
@@ -96,10 +96,10 @@ export function Hero() {
           variants={fade}
           initial="hidden"
           animate="show"
-          className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
+          className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground"
         >
-          Aptiv scores a full batch of CVs against your job description and tells
-          you who to call first.
+          Aptiv scores a full batch of CVs against your job description and
+          tells you who to call first.
         </motion.p>
 
         <motion.div
@@ -107,13 +107,13 @@ export function Hero() {
           variants={fade}
           initial="hidden"
           animate="show"
-          className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <SignedOut>
             <Link href="/sign-up">
               <Button size="lg" className="group">
                 Start screening free
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
               </Button>
             </Link>
           </SignedOut>
@@ -121,7 +121,7 @@ export function Hero() {
             <Link href="/dashboard/new">
               <Button size="lg" className="group">
                 New screening
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
               </Button>
             </Link>
           </SignedIn>
@@ -130,21 +130,6 @@ export function Hero() {
               See how it works
             </Button>
           </a>
-        </motion.div>
-
-        <motion.div
-          custom={4}
-          variants={fade}
-          initial="hidden"
-          animate="show"
-          className="mt-9 flex flex-wrap items-center justify-center gap-2.5"
-        >
-          {PILLS.map((p) => (
-            <span key={p.label} className="pill">
-              <p.icon className="h-4 w-4 text-primary" />
-              {p.label}
-            </span>
-          ))}
         </motion.div>
       </div>
     </section>

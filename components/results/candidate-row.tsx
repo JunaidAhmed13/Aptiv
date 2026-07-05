@@ -68,9 +68,12 @@ export function CandidateRow({
 
       {/* Score bar (desktop) */}
       <span className="hidden h-1.5 w-32 shrink-0 overflow-hidden rounded-full bg-muted md:block">
-        <span
-          className="block h-full rounded-full bg-gradient-to-r from-coral-500 to-indigo-500"
+        <motion.span
+          className="block h-full origin-left rounded-full bg-gradient-to-r from-coral-500 to-indigo-500 dark:from-foreground/50 dark:to-foreground/50"
           style={{ width: `${score === null ? 0 : Math.max(4, score * 10)}%` }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ delay: Math.min(index * 0.03, 0.4) + 0.15, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         />
       </span>
 

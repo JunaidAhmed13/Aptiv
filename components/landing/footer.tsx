@@ -45,7 +45,7 @@ export function Footer() {
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="link-underline text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {l.label}
                     </Link>
@@ -57,7 +57,7 @@ export function Footer() {
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row">
           <p>© {new Date().getFullYear()} Aptiv. All rights reserved.</p>
-          <p>Built for high-volume recruiting teams.</p>
+          <p className="text-muted-foreground/80">Built for high-volume recruiting teams.</p>
         </div>
       </div>
     </footer>

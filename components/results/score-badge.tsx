@@ -8,7 +8,7 @@ const TONE: Record<ScoreTone, string> = {
   neutral: "bg-muted text-muted-foreground ring-border",
 };
 
-/** Compact, emphasized fit-score chip. Shows "—" for missing scores. */
+/** Compact, emphasized fit-score chip. Shows "-" for missing scores. */
 export function ScoreBadge({
   score,
   size = "md",
@@ -37,7 +37,7 @@ export function ScoreBadge({
       )}
       aria-label={n === null ? "No score" : `Fit score ${n.toFixed(1)} out of 10`}
     >
-      {n === null ? "—" : n.toFixed(1)}
+      {n === null ? "-" : n.toFixed(1)}
     </span>
   );
 }

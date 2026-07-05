@@ -59,8 +59,8 @@ export function UploadZone({
         "group flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed px-6 py-10 text-center transition-all duration-200",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
         dragging
-          ? "border-indigo-400 bg-indigo-50"
-          : "border-border bg-surface-muted hover:border-indigo-300 hover:bg-indigo-50/40",
+          ? "scale-[1.01] border-primary/60 bg-primary/10"
+          : "border-border bg-surface-muted hover:border-primary/40 hover:bg-primary/5",
         disabled && "pointer-events-none opacity-60"
       )}
     >
@@ -81,8 +81,8 @@ export function UploadZone({
         className={cn(
           "grid h-14 w-14 place-items-center rounded-2xl transition-transform duration-200 group-hover:scale-105",
           dragging
-            ? "bg-indigo-500 text-white"
-            : "bg-gradient-to-br from-coral-100 to-indigo-100 text-indigo-600"
+            ? "scale-105 bg-primary text-primary-foreground"
+            : "bg-primary/10 text-primary"
         )}
       >
         <UploadCloud className="h-7 w-7" />

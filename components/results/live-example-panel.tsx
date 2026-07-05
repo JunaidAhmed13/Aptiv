@@ -116,24 +116,42 @@ export function LiveExamplePanel() {
   const dots = useMemo(() => SAMPLES.map((_, idx) => idx), []);
 
   return (
-    <Card className="flex h-full max-h-[640px] flex-col overflow-hidden p-0">
-      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+    <Card className="edge-hairline flex h-full max-h-[640px] flex-col overflow-hidden p-0">
+      <div className="relative flex items-center justify-between border-b border-border px-5 py-3.5">
         <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
           Sample output
         </span>
-        <div className="flex items-center gap-1.5" aria-hidden>
+        <div className="flex items-center gap-1.5">
           {dots.map((d) => (
             <button
               key={d}
               onClick={() => setI(d)}
-              className={`h-1.5 rounded-full transition-all ${
-                d === i ? "w-5 bg-primary" : "w-1.5 bg-border hover:bg-muted-foreground/40"
-              }`}
+              className="group/dot -m-1 rounded-full p-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               aria-label={`Show sample ${d + 1}`}
-            />
+              aria-current={d === i}
+            >
+              <span
+                className={`block h-1.5 rounded-full transition-all ${
+                  d === i
+                    ? "w-5 bg-primary"
+                    : "w-1.5 bg-border group-hover/dot:bg-muted-foreground/40"
+                }`}
+              />
+            </button>
           ))}
         </div>
+        {/* Cycle timer: shows how long until the next sample. Restarts per card. */}
+        {!reduce && (
+          <motion.span
+            key={i}
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-px origin-left bg-gradient-to-r from-indigo-500/50 to-violet-500/50 dark:from-foreground/25 dark:to-foreground/25"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 6, ease: "linear" }}
+          />
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">

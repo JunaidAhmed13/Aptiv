@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+} from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Logo } from "@/components/logo";
@@ -20,12 +25,9 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  // Scroll state via motion's scroll pipeline (no raw scroll listener).
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 12));
 
   return (
     <motion.header
@@ -75,7 +77,7 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Link href="/sign-up">
-                  <Button size="sm">Start screening</Button>
+                  <Button size="sm">Start screening free</Button>
                 </Link>
               </SignedOut>
               <SignedIn>
@@ -99,21 +101,27 @@ export function Navbar() {
           </div>
         </nav>
 
+        <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: -8, scale: 0.99 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.99, transition: { duration: 0.15 } }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className="mt-2 rounded-2xl border border-border bg-surface p-3 shadow-card md:hidden"
           >
-            {LINKS.map((l) => (
-              <a
+            {LINKS.map((l, i) => (
+              <motion.a
                 key={l.href}
                 href={l.href}
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 + i * 0.05, duration: 0.25 }}
                 onClick={() => setOpen(false)}
                 className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
               >
                 {l.label}
-              </a>
+              </motion.a>
             ))}
             <div className="mt-2 flex flex-col gap-2 border-t border-border pt-3">
               <SignedOut>
@@ -124,7 +132,7 @@ export function Navbar() {
                 </Link>
                 <Link href="/sign-up" onClick={() => setOpen(false)}>
                   <Button size="sm" className="w-full">
-                    Start screening
+                    Start screening free
                   </Button>
                 </Link>
               </SignedOut>
@@ -138,6 +146,7 @@ export function Navbar() {
             </div>
           </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </motion.header>
   );

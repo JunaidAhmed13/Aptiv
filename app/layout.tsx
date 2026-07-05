@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Geist, Fraunces } from "next/font/google";
+import { Inter, Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "@/components/providers";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -22,20 +22,13 @@ const geist = Geist({
   display: "swap",
 });
 
-// Editorial serif for the optional About / founder-story voice (LeadIQ feel).
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: "Aptiv",
   description:
     "Upload a job description and a batch of CVs. Aptiv scores each one against the role, ranks by fit, and tells you who to call first.",
   icons: { icon: "/icon" },
   openGraph: {
-    title: "Aptiv — Bulk CV Screening for Recruiters",
+    title: "Aptiv: Bulk CV Screening for Recruiters",
     description:
       "Upload a JD and a batch of CVs. Aptiv scores each candidate against the role and returns a ranked shortlist.",
     siteName: "Aptiv",
@@ -51,7 +44,7 @@ export default function RootLayout({
       <html
         lang="en"
         suppressHydrationWarning
-        className={`${inter.variable} ${geist.variable} ${fraunces.variable}`}
+        className={`${inter.variable} ${geist.variable}`}
       >
         <head>
           <script dangerouslySetInnerHTML={{ __html: themeScript }} />

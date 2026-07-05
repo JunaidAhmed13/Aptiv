@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
   Mail,
   Phone,
   Briefcase,
+  Check,
   CheckCircle2,
   AlertCircle,
   StickyNote,
@@ -204,6 +206,14 @@ function ContactRow({
   href?: string;
   onCopy: () => void;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const id = window.setTimeout(() => setCopied(false), 1500);
+    return () => window.clearTimeout(id);
+  }, [copied]);
+
   if (!value) {
     return (
       <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface-muted px-3.5 py-2.5 text-sm text-muted-foreground">
@@ -223,11 +233,18 @@ function ContactRow({
         <span className="min-w-0 flex-1 truncate text-foreground">{value}</span>
       )}
       <button
-        onClick={onCopy}
+        onClick={() => {
+          onCopy();
+          setCopied(true);
+        }}
         className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        aria-label="Copy"
+        aria-label={copied ? "Copied" : "Copy"}
       >
-        <Copy className="h-3.5 w-3.5" />
+        {copied ? (
+          <Check className="h-3.5 w-3.5 text-success" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
       </button>
     </div>
   );

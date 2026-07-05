@@ -35,7 +35,7 @@ async function postScreening({ jd, cvs }: ScreenInput): Promise<ScreenResult> {
   } catch (err) {
     // Network-level failure (offline, DNS, etc.) — surface, don't swallow.
     throw new ScreenError(
-      "Network error — could not reach Aptiv. Check your connection and try again.",
+      "Network error. Could not reach Aptiv. Check your connection and try again.",
       0
     );
   }

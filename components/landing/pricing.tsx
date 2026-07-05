@@ -15,7 +15,7 @@ const CONTACT_TO = "vynix.automate@gmail.com";
 const CONTACT_CC = "vynix.automate@gmail.com";
 const contactMailto = (plan: string) =>
   `mailto:${CONTACT_TO}?cc=${CONTACT_CC}&subject=${encodeURIComponent(
-    `Aptiv — ${plan} plan enquiry`
+    `Aptiv ${plan} plan enquiry`
   )}&body=${encodeURIComponent(
     `Hi Aptiv team,\n\nWe'd like to get started on the ${plan} plan.\n\nTeam size:\nApprox. candidates / month:\n\nThanks,`
   )}`;
@@ -30,7 +30,7 @@ const TIERS = [
     price: "$0",
     cadence: "/mo",
     blurb: "For trying Aptiv on a live role.",
-    cta: "Start free",
+    cta: "Start screening free",
     action: "auth" as const,
     featured: false,
     features: [
@@ -79,8 +79,7 @@ export function Pricing() {
     <section id="pricing" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="pill">Pricing</span>
-          <h2 className="mt-5 font-display text-display-md font-bold text-foreground">
+          <h2 className="font-display text-display-md font-bold text-foreground">
             Pricing that fits how you hire
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -89,20 +88,21 @@ export function Pricing() {
           </p>
         </div>
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-3">
+        <div className="mt-14 grid items-start gap-6 lg:grid-cols-3">
           {TIERS.map((t, i) => (
             <motion.div
               key={t.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
-              transition={{ delay: i * 0.08, duration: 0.5 }}
+              transition={{ delay: i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className={cn(t.featured && "lg:-mt-4")}
             >
               <Card
                 className={cn(
-                  "relative flex h-full flex-col p-7",
+                  "relative flex h-full flex-col p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-card",
                   t.featured &&
-                    "border-transparent bg-gradient-to-b from-primary/5 to-surface shadow-card ring-1 ring-primary/25"
+                    "edge-hairline border-transparent bg-gradient-to-b from-primary/5 to-surface shadow-card ring-1 ring-primary/25 lg:p-8"
                 )}
               >
                 {t.featured && (
@@ -122,11 +122,18 @@ export function Pricing() {
                 </div>
 
                 <ul className="mt-6 flex-1 space-y-3">
-                  {t.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  {t.features.map((f, fi) => (
+                    <motion.li
+                      key={f}
+                      initial={{ opacity: 0, x: -6 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ delay: 0.2 + fi * 0.05, duration: 0.35 }}
+                      className="flex items-start gap-2.5 text-sm text-foreground"
+                    >
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                       {f}
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
 

@@ -21,8 +21,16 @@ import { cn } from "@/lib/utils";
  * brighter, more saturated trails; slow movement = gentle blending. Dye and
  * velocity dissipate over time so the screen never permanently fills.
  *
- * LIGHT mode: vibrant multi-color dye. DARK mode: the effect is disabled (the
+ * LIGHT mode: multi-tone dye constrained to the brand band (indigo through
+ * violet to lavender; see brandColor). DARK mode: the effect is disabled (the
  * canvas stays transparent) so dark mode remains strictly dark/neutral.
+ *
+ * Liveliness comes from four things (tuned against the canonical
+ * PavelDoGreat parameters): sub-splats interpolated along the pointer path,
+ * speed-scaled splat radius/brightness, slow dye dissipation (0.85) so smoke
+ * lingers and swirls, and seed + idle ambient splats so the field is never
+ * blank. All injection and solving stays on the GPU; the CPU does at most 6
+ * tiny uniform uploads per frame.
  *
  * Adapted from the standard GPU fluid technique (Stam / Crane / PavelDoGreat).
  * Self-contained: no external library, no CDN.
@@ -205,6 +213,9 @@ uniform sampler2D uTexture;
 out vec4 fragColor;
 void main() {
   vec3 c = texture(uTexture, vUv).rgb;
+  // Soft gamma lift: raises the low end so thin, dissipating trails keep a
+  // visible smoky body instead of cutting off abruptly.
+  c = pow(max(c, 0.0), vec3(0.85));
   // Premultiplied-ish alpha from dye luminance so the page background shows
   // through where there is no dye.
   float a = clamp(max(c.r, max(c.g, c.b)) * 1.2, 0.0, 1.0);
@@ -276,27 +287,32 @@ function createDoubleFBO(gl: GL, w: number, h: number, internal: number, format:
   };
 }
 
-// Vibrant light-mode palette (HSV-ish hues kept lively but not neon).
-function vibrantColor(seed: number): [number, number, number] {
-  // cycle through a multi-hue range; magnitude kept modest, sim brightens fast splats
-  const h = (seed * 0.13) % 1;
-  // simple HSV->RGB with s=0.85, v=1
-  const s = 0.85, v = 1;
+// Brand-band dye: the hue oscillates inside the purple family only
+// (indigo ~232deg through violet to lavender ~284deg), with saturation
+// breathing on a second, slower phase. Two out-of-sync sine waves mean
+// neighboring splats land on different points of the band, so the fluid
+// blends indigo into violet into lavender as it swirls, CapsuleHub-style
+// multi-color motion without ever leaving the palette.
+function brandColor(seed: number): [number, number, number] {
+  const t = seed * 0.35;
+  const h = (258 + Math.sin(t) * 26) / 360; // 232..284deg, purple band only
+  const s = 0.72 + 0.18 * Math.sin(t * 0.63 + 1.7); // 0.54..0.90
+  const v = 1;
   const i = Math.floor(h * 6);
   const f = h * 6 - i;
   const p = v * (1 - s);
   const q = v * (1 - f * s);
-  const t = v * (1 - (1 - f) * s);
+  const w = v * (1 - (1 - f) * s);
   let r = 0, g = 0, b = 0;
   switch (i % 6) {
-    case 0: r = v; g = t; b = p; break;
+    case 0: r = v; g = w; b = p; break;
     case 1: r = q; g = v; b = p; break;
-    case 2: r = p; g = v; b = t; break;
+    case 2: r = p; g = v; b = w; break;
     case 3: r = p; g = q; b = v; break;
-    case 4: r = t; g = p; b = v; break;
+    case 4: r = w; g = p; b = v; break;
     case 5: r = v; g = p; b = q; break;
   }
-  return [r * 0.18, g * 0.18, b * 0.18];
+  return [r * 0.2, g * 0.2, b * 0.2];
 }
 
 export function LiquidBlobBackground({ className }: { className?: string }) {
@@ -405,9 +421,12 @@ export function LiquidBlobBackground({ className }: { className?: string }) {
     const ro = new ResizeObserver(resizeCanvas);
     ro.observe(canvas);
 
-    // Pointer tracking (normalized 0..1, GL origin bottom-left).
-    const pointer = { x: 0.5, y: 0.5, dx: 0, dy: 0, moved: false, down: false };
+    // Pointer tracking (normalized 0..1, GL origin bottom-left). px/py hold
+    // the last position we splatted from, so fast frames can interpolate.
+    const pointer = { x: 0.5, y: 0.5, px: 0.5, py: 0.5, dx: 0, dy: 0, moved: false };
     let colorSeed = Math.random() * 100;
+    let lastInteraction = performance.now();
+    let lastAmbient = 0;
 
     const onMove = (e: PointerEvent) => {
       const r = canvas.getBoundingClientRect();
@@ -418,11 +437,20 @@ export function LiquidBlobBackground({ className }: { className?: string }) {
       pointer.x = nx;
       pointer.y = ny;
       pointer.moved = true;
+      lastInteraction = performance.now();
     };
     window.addEventListener("pointermove", onMove, { passive: true });
 
-    // Splat: inject velocity + dye at the pointer, scaled by speed.
-    const splat = (x: number, y: number, dx: number, dy: number, color: [number, number, number]) => {
+    // Splat: inject velocity + dye at a point. Radius is per-splat so fast
+    // strokes can carve wider trails than slow drifts.
+    const splat = (
+      x: number,
+      y: number,
+      dx: number,
+      dy: number,
+      color: [number, number, number],
+      radius: number
+    ) => {
       const aspect = canvas.width / canvas.height;
       // velocity
       const pv = programs.splat!;
@@ -434,7 +462,7 @@ export function LiquidBlobBackground({ className }: { className?: string }) {
       gl.uniform1f(uloc(pv, "aspectRatio"), aspect);
       gl.uniform2f(uloc(pv, "point"), x, y);
       gl.uniform3f(uloc(pv, "color"), dx, dy, 0);
-      gl.uniform1f(uloc(pv, "radius"), 0.00022);
+      gl.uniform1f(uloc(pv, "radius"), radius);
       blit(velocity.write);
       velocity.swap();
       // dye
@@ -444,23 +472,56 @@ export function LiquidBlobBackground({ className }: { className?: string }) {
       dye.swap();
     };
 
+    // Gentle self-driven splat: keeps the hero alive before/without a cursor.
+    // Slow injection velocity, wide soft radius, palette-band color.
+    const ambientSplat = (strength = 1) => {
+      const x = 0.2 + Math.random() * 0.6;
+      const y = 0.3 + Math.random() * 0.45;
+      const angle = Math.random() * Math.PI * 2;
+      const mag = (90 + Math.random() * 140) * strength;
+      colorSeed += 2 + Math.random() * 3;
+      const base = brandColor(colorSeed);
+      const color: [number, number, number] = [base[0] * 1.6, base[1] * 1.6, base[2] * 1.6];
+      splat(x, y, Math.cos(angle) * mag, Math.sin(angle) * mag, color, 0.001 + Math.random() * 0.0014);
+    };
+
     let raf = 0;
     let lastT = performance.now();
+
+    // Wake the field up so the hero shows gentle color before any interaction.
+    for (let k = 0; k < 4; k++) ambientSplat(0.8);
 
     const step = (now: number) => {
       const dt = Math.min((now - lastT) / 1000, 0.0166);
       lastT = now;
 
-      // Inject from pointer movement.
+      // Inject from pointer movement. Fast frames can cover a long segment,
+      // so interpolate sub-splats along the path (up to 6) for continuous
+      // trails instead of dotted stamps.
       if (pointer.moved) {
         pointer.moved = false;
+        const segX = pointer.x - pointer.px;
+        const segY = pointer.y - pointer.py;
+        const dist = Math.hypot(segX, segY);
         const speed = Math.hypot(pointer.dx, pointer.dy);
-        // Faster movement => brighter, bigger trail.
+        // Faster movement => brighter, bigger, wider trail.
         const boost = Math.min(1 + speed * 1.2, 7);
-        colorSeed += 0.5 + speed * 2;
-        const base = vibrantColor(colorSeed);
-        const color: [number, number, number] = [base[0] * boost, base[1] * boost, base[2] * boost];
-        splat(pointer.x, pointer.y, pointer.dx * 800, pointer.dy * 800, color);
+        const radius = Math.min(0.00022 * (1 + speed * 3.5), 0.0012);
+        const n = Math.min(Math.max(1, Math.ceil(dist * 60)), 6);
+        for (let i = 1; i <= n; i++) {
+          const px = pointer.px + (segX * i) / n;
+          const py = pointer.py + (segY * i) / n;
+          colorSeed += (0.5 + speed * 2) / n;
+          const base = brandColor(colorSeed);
+          const color: [number, number, number] = [base[0] * boost, base[1] * boost, base[2] * boost];
+          splat(px, py, (pointer.dx * 800) / Math.sqrt(n), (pointer.dy * 800) / Math.sqrt(n), color, radius);
+        }
+        pointer.px = pointer.x;
+        pointer.py = pointer.y;
+      } else if (now - lastInteraction > 3500 && now - lastAmbient > 2600) {
+        // Idle: keep the field breathing with an occasional soft swirl.
+        lastAmbient = now;
+        ambientSplat(0.6);
       }
 
       // --- curl ---
@@ -480,7 +541,9 @@ export function LiquidBlobBackground({ className }: { className?: string }) {
       gl.uniform2f(uloc(p, "texelSize"), velocity.texelX, velocity.texelY);
       gl.uniform1i(uloc(p, "uVelocity"), 0);
       gl.uniform1i(uloc(p, "uCurl"), 1);
-      gl.uniform1f(uloc(p, "curl"), 28);
+      // Vorticity strength ~30 is the sweet spot in the canonical sim; a bit
+      // above keeps swirls alive longer so trails curl instead of smearing.
+      gl.uniform1f(uloc(p, "curl"), 32);
       gl.uniform1f(uloc(p, "dt"), dt);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, velocity.read.texture);
@@ -544,10 +607,12 @@ export function LiquidBlobBackground({ className }: { className?: string }) {
       velocity.swap();
 
       // --- advect dye (dissipates over time so screen never fills) ---
+      // 0.85 (was 1.1): slower fade = smoke lingers and keeps swirling after
+      // the cursor passes, which is most of the reference's "alive" feel.
       gl.uniform2f(uloc(p, "texelSize"), velocity.texelX, velocity.texelY);
       gl.uniform1i(uloc(p, "uVelocity"), 0);
       gl.uniform1i(uloc(p, "uSource"), 1);
-      gl.uniform1f(uloc(p, "dissipation"), 1.1);
+      gl.uniform1f(uloc(p, "dissipation"), 0.85);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, velocity.read.texture);
       gl.activeTexture(gl.TEXTURE1);

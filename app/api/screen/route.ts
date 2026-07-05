@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Screening timed out. Large batches can take a couple of minutes — please try again, or reduce the number of CVs.",
+            "Screening timed out. Large batches can take a couple of minutes. Please try again, or reduce the number of CVs.",
         },
         { status: 504 }
       );

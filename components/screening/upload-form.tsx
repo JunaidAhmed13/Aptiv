@@ -102,7 +102,7 @@ export function UploadForm() {
 
       if (result.candidates.length === 0) {
         toast({
-          title: "Screening finished — no candidates returned",
+          title: "Screening finished, no candidates returned",
           description: "The backend returned an empty result. Open the screening to retry or review.",
           variant: "info",
         });
@@ -137,7 +137,7 @@ export function UploadForm() {
       <div className="space-y-6">
         <Card className="p-6">
           <div className="mb-4 flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-coral-50 text-coral-600">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent/10 text-accent">
               <FileText className="h-4.5 w-4.5" />
             </span>
             <h2 className="text-base font-semibold text-foreground">Job description</h2>
@@ -156,7 +156,7 @@ export function UploadForm() {
         <Card className="p-6">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-lg bg-indigo-50 text-indigo-600">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
                 <Sparkles className="h-4.5 w-4.5" />
               </span>
               <h2 className="text-base font-semibold text-foreground">Candidate CVs</h2>
@@ -190,8 +190,8 @@ export function UploadForm() {
             type="text"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder={defaultLabel || "e.g. Senior Backend Engineer — June"}
-            className="mt-1.5 w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+            placeholder={defaultLabel || "e.g. Senior Backend Engineer, June"}
+            className="mt-1.5 w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
           />
           <p className="mt-1.5 text-xs text-muted-foreground">
             Helps you find this screening later in your history.
